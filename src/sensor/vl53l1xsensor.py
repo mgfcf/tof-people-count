@@ -1,4 +1,4 @@
-from sensor.tofsensor import Direction, ToFSensor
+from sensor.tofsensor import Directions, ToFSensor
 import VL53L1X
 
 # Reference: https://github.com/pimoroni/vl53l1x-python
@@ -22,7 +22,7 @@ class VL53L1XSensor (TofSensor):
     def __init__(self) -> None:
         super().__init__()
 
-    def open(self):
+    def open(self) -> None:
         self.sensor = VL53L1X.VL53L1X(i2c_bus=1, i2c_address=0x29)
         self.sensor.open()
 
@@ -37,12 +37,13 @@ class VL53L1XSensor (TofSensor):
         # 1 = Short Range
         # 2 = Medium Range
         # 3 = Long Range
-    def setDirection(self, direction: Direction):
+
+    def setDirection(self, direction: Directions) -> None:
         """Configure sensor to pick up the distance in a specific direction.
         """
         direction_roi = {
-            Direction.INDOOR: VL53L1X.VL53L1xUserRoi(6, 3, 9, 0),
-            Direction.OUTDOOR: VL53L1X.VL53L1xUserRoi(6, 15, 9, 12)
+            Directions.INSIDE: VL53L1X.VL53L1xUserRoi(6, 3, 9, 0),
+            Directions.OUTSIDE: VL53L1X.VL53L1xUserRoi(6, 15, 9, 12)
         }
 
         roi = direction_roi[direction]
@@ -58,6 +59,6 @@ class VL53L1XSensor (TofSensor):
 
         return distance / 10
 
-    def close(self):
+    def close(self) -> None:
         self.sensor.stop_ranging()
         self.sensor.close()

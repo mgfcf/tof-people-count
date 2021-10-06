@@ -1,16 +1,25 @@
 from enum import Enum
 
 
-class Direction(Enum):
-    INDOOR = "indoor"
-    OUTDOOR = "outdoor"
+class Directions(Enum):
+    INSIDE = "indoor"
+    OUTSIDE = "outdoor"
+
+    def other(self, direction: Direction) -> Direction:
+        if direction is Directions.INSIDE:
+            return Directions.OUTSIDE
+        else:
+            return Directions.INSIDE
+
+    def __iter__(self):
+        return [self.INSIDE, self.OUTSIDE]
 
 
 class ToFSensor:
-    def open(self):
+    def open(self) -> None:
         raise NotImplementedError()
 
-    def setDirection(self, direction: Direction):
+    def setDirection(self, direction: Directions) -> None:
         """Configure sensor to pick up the distance in a specific direction.
         """
         raise NotImplementedError()
@@ -19,6 +28,6 @@ class ToFSensor:
         """Returns new distance in cm.
         """
         raise NotImplementedError()
-    
-    def close(self):
+
+    def close(self) -> None:
         raise NotImplementedError()
