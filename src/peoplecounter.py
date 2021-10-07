@@ -116,7 +116,7 @@ class PeopleCounter ():
             cb(countChange)
 
     def updateState(self, direction: Directions, triggered: bool) -> bool:
-        currentlyTriggered = self.directionState[direction] == None
+        currentlyTriggered = self.directionState[direction][END_TIME] == None
 
         if triggered and not currentlyTriggered:
             # Set as new beginning for this direction
