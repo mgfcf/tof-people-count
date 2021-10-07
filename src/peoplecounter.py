@@ -42,8 +42,6 @@ class PeopleCounter ():
             distance: float = self.sensor.getDistance()
             triggered: bool = self.isTriggerDistance(distance)
             changed: bool = self.updateState(direction, triggered)
-            
-            logging.debug(f'Direction [{direction}] at {datetime.now()}\tDistance [{distance}cm]\tTriggered [{triggered}]')
 
             if changed:
                 countChange: int = self.getCountChange(self.directionState)
