@@ -31,9 +31,13 @@ class PeopleCounter ():
             }
         }
 
+        self.sensor.open()
         while self.keepRunning:
             # Switch to other direction
             direction: Directions = Directions.other(direction)
+            print("-" * 20)
+            print("Direction:",direction)
+            print("At time",datetime.now())
 
             self.sensor.setDirection(direction)
 
@@ -44,6 +48,8 @@ class PeopleCounter ():
             if changed:
                 countChange: int = self.getCountChange(self.directionState)
                 self.handleCallbacks(countChange)
+                
+        self.sensor.close()
 
     def getCountChange(self, directionState) -> int:
         # Is valid?
