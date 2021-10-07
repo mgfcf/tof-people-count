@@ -18,7 +18,7 @@ import VL53L1X
 #
 
 
-class VL53L1XSensor (TofSensor):
+class VL53L1XSensor (ToFSensor):
     def __init__(self) -> None:
         super().__init__()
 
