@@ -5,7 +5,7 @@ import logging
 counter = PeopleCounter(VL53L1XSensor())
 peopleCount = 0
 
-logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(logging.DEBUG)
 
 
 def countChange(change: int) -> None:
