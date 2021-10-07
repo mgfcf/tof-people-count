@@ -5,14 +5,14 @@ class Directions(Enum):
     INSIDE = "indoor"
     OUTSIDE = "outdoor"
 
-    def other(self, direction: 'Direction') -> 'Direction':
+    def other(direction: 'Direction') -> 'Direction':
         if direction is Directions.INSIDE:
             return Directions.OUTSIDE
         else:
             return Directions.INSIDE
 
-    def __iter__(self):
-        return [self.INSIDE, self.OUTSIDE]
+    def __iter__():
+        return [Directions.INSIDE, Directions.OUTSIDE]
 
 
 class ToFSensor:
