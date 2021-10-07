@@ -36,13 +36,14 @@ class PeopleCounter ():
         while self.keepRunning:
             # Switch to other direction
             direction: Directions = Directions.other(direction)
-            logging.debug(f'Direction [{direction}] at {datetime.now()}')
 
             self.sensor.setDirection(direction)
 
             distance: float = self.sensor.getDistance()
             triggered: bool = self.isTriggerDistance(distance)
             changed: bool = self.updateState(direction, triggered)
+            
+            logging.debug(f'Direction [{direction}] at {datetime.now()}\tDistance [{distance}cm]\tTriggered [{triggered}]')
 
             if changed:
                 countChange: int = self.getCountChange(self.directionState)
