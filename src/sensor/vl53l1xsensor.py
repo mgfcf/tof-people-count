@@ -50,7 +50,7 @@ class VL53L1XSensor (ToFSensor):
 
         self.sensor.stop_ranging()
         self.sensor.set_user_roi(roi)
-        self.start_ranging(self.ranging)
+        self.sensor.start_ranging(self.ranging)
 
     def getDistance(self) -> float:
         """Returns new distance in cm.
