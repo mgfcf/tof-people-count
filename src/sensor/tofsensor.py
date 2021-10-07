@@ -5,7 +5,7 @@ class Directions(Enum):
     INSIDE = "indoor"
     OUTSIDE = "outdoor"
 
-    def other(self, direction: Direction) -> Direction:
+    def other(self, direction: 'Direction') -> 'Direction':
         if direction is Directions.INSIDE:
             return Directions.OUTSIDE
         else:
