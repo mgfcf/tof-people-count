@@ -1,2 +1,5 @@
 smbus2
 vl53l1x
+
+# For Home Assistant MQTT Sensor
+paho-mqtt
