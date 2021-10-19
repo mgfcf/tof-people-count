@@ -2,6 +2,7 @@ from peoplecounter import PeopleCounter
 from sensor.vl53l1xsensor import VL53L1XSensor
 import paho.mqtt.client as mqtt
 from HaMqtt.MQTTSensor import MQTTSensor
+from HaMqtt.MQTTUtil import HaDeviceClass
 import logging
 
 
@@ -9,6 +10,8 @@ HA_URL = ""
 HA_PORT = 1883
 HA_SENSOR_NAME = ""
 HA_SENSOR_ID = ""
+HA_SENSOR_DEVICE_CLASS = HaDeviceClass.NONE
+SENSOR_UNIT = ""
 
 
 # Setup connection to HA
@@ -17,7 +20,7 @@ mqttClient.connect(HA_URL, HA_PORT)
 mqttClient.loop_start()  # Keep conneciton alive
 
 # Setup mqtt binding
-sensor = MQTTSensor(HA_SENSOR_NAME, HA_SENSOR_ID, mqttClient)
+sensor = MQTTSensor(HA_SENSOR_NAME, HA_SENSOR_ID, mqttClient, SENSOR_UNIT, HA_SENSOR_DEVICE_CLASS)
 logging.debug(f'Connected to topic {sensor.state_topic}')
 
 
