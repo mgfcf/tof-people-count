@@ -3,3 +3,4 @@ vl53l1x
 
 # For Home Assistant MQTT Sensor
 paho-mqtt
+homeassistant-mqtt-binding
