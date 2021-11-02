@@ -1,5 +1,5 @@
-from peoplecounter import PeopleCounter
-from sensor.vl53l1xsensor import VL53L1XSensor
+from sensor.people_counter import PeopleCounter
+from sensor.vl53l1x_sensor import VL53L1XSensor
 import logging
 
 counter = PeopleCounter(VL53L1XSensor())

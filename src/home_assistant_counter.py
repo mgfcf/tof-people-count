@@ -1,5 +1,5 @@
-from peoplecounter import PeopleCounter
-from sensor.vl53l1xsensor import VL53L1XSensor
+from sensor.people_counter import PeopleCounter
+from sensor.vl53l1x_sensor import VL53L1XSensor
 import paho.mqtt.client as mqtt
 from HaMqtt.MQTTSensor import MQTTSensor
 from HaMqtt.MQTTUtil import HaDeviceClass
