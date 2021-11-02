@@ -1,4 +1,4 @@
-from sensor.tofsensor import ToFSensor, Directions
+from sensor.tof_sensor import ToFSensor, Directions
 from datetime import datetime
 import logging
 

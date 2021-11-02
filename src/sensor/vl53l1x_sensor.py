@@ -1,4 +1,4 @@
-from sensor.tofsensor import Directions, ToFSensor
+from sensor.tof_sensor import Directions, ToFSensor
 import VL53L1X
 
 # Reference: https://github.com/pimoroni/vl53l1x-python
