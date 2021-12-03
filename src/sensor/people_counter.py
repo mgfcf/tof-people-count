@@ -61,9 +61,8 @@ class PeopleCounter ():
                 countChange: int = self.getCountChange(self.directionState)
                 
                 # Hooks
-                self.handleChangeCallbacks(countChange)
-                self.handleCountingCallbacks(countChange)
-                self.handleTriggerCallbacks()
+                th = threading.Thread(target=self.handleCallbacks, args=(self,countChange))
+                th.start()
 
                 # Reset records
                 if countChange != 0:
@@ -131,6 +130,11 @@ class PeopleCounter ():
     def isTriggerDistance(self, distance: float) -> bool:
         #! TODO: Should be based on the distance from the ground, not them the sensor
         return distance <= self.maxTriggerDistance
+    
+    def handleCallbacks(self, countChange: int):
+        self.handleChangeCallbacks(countChange)
+        self.handleCountingCallbacks(countChange)
+        self.handleTriggerCallbacks()
 
     def handleCountingCallbacks(self, countChange: int) -> None:
         # Only notify counting on actual count change
@@ -138,8 +142,7 @@ class PeopleCounter ():
             return
 
         for cb in self.callbacks[COUNTING_CB]:
-            th = threading.Thread(target=cb, args=(countChange,))
-            th.start()
+            cb(countChange)
 
     def handleTriggerCallbacks(self) -> None:
         insideTrigger = len(self.directionState[Directions.INSIDE]) > 0 and self.directionState[Directions.INSIDE][-1][END_TIME] is None
@@ -151,13 +154,11 @@ class PeopleCounter ():
         }
         
         for cb in self.callbacks[TRIGGER_CB]:
-            th = threading.Thread(target=cb, args=(triggerState,))
-            th.start()
+            cb(triggerState)
 
     def handleChangeCallbacks(self, countChange: int) -> None:
         for cb in self.callbacks[CHANGE_CB]:
-            th = threading.Thread(target=cb, args=(countChange, self.directionState))
-            th.start()
+            cb(countChange, self.directionState)
 
     def updateState(self, direction: Directions, triggered: bool) -> bool:
         previouslyTriggered = False
