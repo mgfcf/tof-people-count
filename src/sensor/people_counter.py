@@ -1,7 +1,7 @@
 from typing import Dict
 from sensor.tof_sensor import ToFSensor, Directions
 from datetime import datetime
-import logging
+import threading
 
 
 COUNTING_CB = "counting"
@@ -137,15 +137,18 @@ class PeopleCounter ():
             return
 
         for cb in self.callbacks[COUNTING_CB]:
-            cb(countChange)
+            th = threading.Thread(target=cb, args=(countChange,))
+            th.start()
 
     def handleActivityCallbacks(self, direction: Directions) -> None:
         for cb in self.callbacks[ACTIVITY_CB]:
-            cb(direction)
+            th = threading.Thread(target=cb, args=(direction,))
+            th.start()
 
     def handleChangeCallbacks(self, countChange: int) -> None:
         for cb in self.callbacks[CHANGE_CB]:
-            cb(countChange, self.directionState)
+            th = threading.Thread(target=cb, args=(countChange, self.directionState))
+            th.start()
 
     def getDirectionTime(self, direction: Directions, time: str) -> datetime:
         if len(self.directionState[direction]) <= 0:
