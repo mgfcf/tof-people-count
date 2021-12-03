@@ -21,7 +21,7 @@ hue_conf = {
 hue = PhilipsHue(hue_conf)
 counter = PeopleCounter(VL53L1XSensor())
 peopleCount = 0
-early_light_state = False
+early_light_state = False   # TODO: Is probably redundant and can be implemented over peopleCount
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -98,7 +98,7 @@ def change_cb(countChange: int, directionState: Dict):
 
     try:
         with open(LOG_FILE_PATH, 'a') as f:
-            f.write(json.dumps(data))
+            f.write(json.dumps(data, default=str))
     except Exception as ex:
         logging.exception(f'Unable to write log file. {ex}')
 
