@@ -98,7 +98,7 @@ def change_cb(countChange: int, directionState: Dict):
 
     try:
         with open(LOG_FILE_PATH, 'a') as f:
-            f.write(json.dumps(data, default=str))
+            f.write(json.dumps(data, default=str) + "\n")
     except Exception as ex:
         logging.exception(f'Unable to write log file. {ex}')
 
