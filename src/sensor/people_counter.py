@@ -74,7 +74,7 @@ class PeopleCounter ():
         # Is valid?
         for direction in Directions:
             # Is there at least one record for every direction?
-            if len(directionState[directionState]) <= 0:
+            if len(directionState[direction]) <= 0:
                 return 0
 
             # Did every record start and end?
