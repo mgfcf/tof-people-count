@@ -57,9 +57,13 @@ class PeopleCounter ():
             triggered: bool = self.isTriggerDistance(distance)
             changed: bool = self.updateState(direction, triggered)
 
+            if triggered:
+                self.handleActivityCallbacks(direction)
+
             if changed:
                 countChange: int = self.getCountChange(self.directionState)
-                self.handleCallbacks(countChange)
+                self.handleChangeCallbacks(countChange)
+                self.handleCountingCallbacks(countChange)
 
                 # Reset records
                 self.directionState = self.getInitialDirectionState()
@@ -127,13 +131,21 @@ class PeopleCounter ():
         #! TODO: Should be based on the distance from the ground, not them the sensor
         return distance <= self.maxTriggerDistance
 
-    def handleCallbacks(self, countChange: int) -> None:
+    def handleCountingCallbacks(self, countChange: int) -> None:
+        # Only notify counting on actual count change
         if countChange == 0:
-            # Do nothing if there is no change
             return
 
         for cb in self.callbacks[COUNTING_CB]:
             cb(countChange)
+
+    def handleActivityCallbacks(self, direction: Directions) -> None:
+        for cb in self.callbacks[ACTIVITY_CB]:
+            cb(direction)
+
+    def handleChangeCallbacks(self, countChange: int) -> None:
+        for cb in self.callbacks[CHANGE_CB]:
+            cb(countChange, self.directionState)
 
     def getDirectionTime(self, direction: Directions, time: str) -> datetime:
         if len(self.directionState[direction]) <= 0:
