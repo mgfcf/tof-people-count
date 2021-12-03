@@ -141,8 +141,8 @@ class PeopleCounter ():
             th.start()
 
     def handleTriggerCallbacks(self) -> None:
-        insideTrigger = len(self.directionState[Directions.INSIDE]) > 0 and self.directionState[Directions.INSIDE][END_TIME] is None
-        outsideTrigger = len(self.directionState[Directions.OUTSIDE]) > 0 and self.directionState[Directions.OUTSIDE][END_TIME] is None
+        insideTrigger = len(self.directionState[Directions.INSIDE]) > 0 and self.directionState[Directions.INSIDE][-1][END_TIME] is None
+        outsideTrigger = len(self.directionState[Directions.OUTSIDE]) > 0 and self.directionState[Directions.OUTSIDE][-1][END_TIME] is None
         
         triggerState = {
             Directions.INSIDE: insideTrigger,
