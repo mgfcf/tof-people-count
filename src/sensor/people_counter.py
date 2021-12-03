@@ -66,7 +66,7 @@ class PeopleCounter ():
                 self.handleTriggerCallbacks()
 
                 # Reset records
-                if changed != 0:
+                if countChange != 0:
                     self.directionState = self.getInitialDirectionState()
 
         self.sensor.close()
