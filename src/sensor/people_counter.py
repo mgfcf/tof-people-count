@@ -61,7 +61,7 @@ class PeopleCounter ():
                 countChange: int = self.getCountChange(self.directionState)
                 
                 # Hooks
-                th = threading.Thread(target=self.handleCallbacks, args=(self,countChange))
+                th = threading.Thread(target=self.handleCallbacks, args=(countChange,))
                 th.start()
 
                 # Reset records
