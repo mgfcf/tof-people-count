@@ -21,7 +21,7 @@ hue_conf = {
 hue = PhilipsHue(hue_conf)
 counter = PeopleCounter(VL53L1XSensor())
 peopleCount = 0
-early_light_state = False   # TODO: Is probably redundant and can be implemented over peopleCount
+early_light_state = False
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -93,7 +93,8 @@ def change_cb(countChange: int, directionState: Dict):
         'previousPeopleCount': peopleCount,
         'countChange': countChange,
         'directionState': directionState,
-        'dateTime': datetime.now()
+        'dateTime': datetime.now(),
+        'earlyLightState': early_light_state
     }
 
     try:
