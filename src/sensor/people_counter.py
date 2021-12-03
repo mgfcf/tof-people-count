@@ -64,8 +64,8 @@ class PeopleCounter ():
                 th = threading.Thread(target=self.handleCallbacks, args=(countChange,))
                 th.start()
 
-                # Reset records
-                if countChange != 0:
+                # Reset state if state is finalised
+                if not self.isDirectionTriggered(Directions.INSIDE) and not self.isDirectionTriggered(Directions.OUTSIDE):
                     self.directionState = self.getInitialDirectionState()
 
         self.sensor.close()
@@ -145,12 +145,9 @@ class PeopleCounter ():
             cb(countChange)
 
     def handleTriggerCallbacks(self) -> None:
-        insideTrigger = len(self.directionState[Directions.INSIDE]) > 0 and self.directionState[Directions.INSIDE][-1][END_TIME] is None
-        outsideTrigger = len(self.directionState[Directions.OUTSIDE]) > 0 and self.directionState[Directions.OUTSIDE][-1][END_TIME] is None
-        
         triggerState = {
-            Directions.INSIDE: insideTrigger,
-            Directions.OUTSIDE: outsideTrigger
+            Directions.INSIDE: self.isDirectionTriggered(Directions.INSIDE),
+            Directions.OUTSIDE: self.isDirectionTriggered(Directions.OUTSIDE)
         }
         
         for cb in self.callbacks[TRIGGER_CB]:
@@ -159,6 +156,9 @@ class PeopleCounter ():
     def handleChangeCallbacks(self, countChange: int) -> None:
         for cb in self.callbacks[CHANGE_CB]:
             cb(countChange, self.directionState)
+    
+    def isDirectionTriggered(self, direction: Directions) -> bool:
+        return len(self.directionState[direction]]) > 0 and self.directionState[direction][-1][END_TIME] is None
 
     def updateState(self, direction: Directions, triggered: bool) -> bool:
         previouslyTriggered = False
