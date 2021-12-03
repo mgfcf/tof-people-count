@@ -1,10 +1,14 @@
+from datetime import datetime
+from pathlib import Path
 from typing import Dict
 from interface.philips_hue import PhilipsHue
 from sensor.people_counter import PeopleCounter
 from sensor.tof_sensor import Directions
 from sensor.vl53l1x_sensor import VL53L1XSensor
 import logging
+import json
 
+LOG_FILE_PATH = "log.txt"
 hue_conf = {
     'bridge_ip': '',
     'transition_time': 10,  # seconds
@@ -79,12 +83,27 @@ def trigger_change(triggerState: Dict):
     
     # Adjust light as necessary
     hue.set_group(hue_conf['light_group'], {'on': target_light_state})
-    logging.debug(f'Light state changed to {target_light_state}')
+    logging.debug(f'Light state changed to {target_light_state} for early light')
     
     early_light_state = target_light_state
 
 
+def change_cb(countChange: int, directionState: Dict):
+    data = {
+        'previousPeopleCount': peopleCount,
+        'countChange': countChange,
+        'directionState': directionState,
+        'dateTime': datetime.now()
+    }
+
+    try:
+        with open(LOG_FILE_PATH, 'a') as f:
+            f.write(json.dumps(data))
+    except Exception as ex:
+        logging.exception(f'Unable to write log file. {ex}')
+
 
 counter.hookCounting(count_change)
 counter.hookTrigger(trigger_change)
+counter.hookChange(change_cb)
 counter.run()
