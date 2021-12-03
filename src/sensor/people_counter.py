@@ -5,7 +5,7 @@ import threading
 
 
 COUNTING_CB = "counting"
-ACTIVITY_CB = "activity"
+TRIGGER_CB = "trigger"
 CHANGE_CB = "changes"
 START_TIME = "start"
 END_TIME = "end"
@@ -14,7 +14,7 @@ END_TIME = "end"
 class PeopleCounter ():
     def __init__(self, sensor: ToFSensor) -> None:
         self.sensor = sensor
-        self.callbacks = {COUNTING_CB: [], ACTIVITY_CB: [], CHANGE_CB: []}
+        self.callbacks = {COUNTING_CB: [], TRIGGER_CB: [], CHANGE_CB: []}
         self.maxTriggerDistance = 120   # In cm
 
     def hookCounting(self, cb) -> None:
@@ -23,11 +23,11 @@ class PeopleCounter ():
     def unhookCounting(self, cb) -> None:
         self.callbacks[COUNTING_CB].remove(cb)
 
-    def hookActivity(self, cb) -> None:
-        self.callbacks[ACTIVITY_CB].append(cb)
+    def hookTrigger(self, cb) -> None:
+        self.callbacks[TRIGGER_CB].append(cb)
 
-    def unhookActivity(self, cb) -> None:
-        self.callbacks[ACTIVITY_CB].remove(cb)
+    def unhookTrigger(self, cb) -> None:
+        self.callbacks[TRIGGER_CB].remove(cb)
 
     def hookChange(self, cb) -> None:
         self.callbacks[CHANGE_CB].append(cb)
@@ -57,13 +57,13 @@ class PeopleCounter ():
             triggered: bool = self.isTriggerDistance(distance)
             changed: bool = self.updateState(direction, triggered)
 
-            if triggered:
-                self.handleActivityCallbacks(direction)
-
             if changed:
                 countChange: int = self.getCountChange(self.directionState)
+                
+                # Hooks
                 self.handleChangeCallbacks(countChange)
                 self.handleCountingCallbacks(countChange)
+                self.handleTriggerCallbacks()
 
                 # Reset records
                 self.directionState = self.getInitialDirectionState()
@@ -140,9 +140,17 @@ class PeopleCounter ():
             th = threading.Thread(target=cb, args=(countChange,))
             th.start()
 
-    def handleActivityCallbacks(self, direction: Directions) -> None:
-        for cb in self.callbacks[ACTIVITY_CB]:
-            th = threading.Thread(target=cb, args=(direction,))
+    def handleTriggerCallbacks(self) -> None:
+        insideTrigger = len(self.directionState[Directions.INSIDE]) > 0 and self.directionState[Directions.INSIDE][END_TIME] is None
+        outsideTrigger = len(self.directionState[Directions.OUTSIDE]) > 0 and self.directionState[Directions.OUTSIDE][END_TIME] is None
+        
+        triggerState = {
+            Directions.INSIDE: insideTrigger,
+            Directions.OUTSIDE: outsideTrigger
+        }
+        
+        for cb in self.callbacks[TRIGGER_CB]:
+            th = threading.Thread(target=cb, args=(triggerState,))
             th.start()
 
     def handleChangeCallbacks(self, countChange: int) -> None:
