@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Directions(Enum):
+class Directions(str, Enum):
     INSIDE = "indoor"
     OUTSIDE = "outdoor"
 
