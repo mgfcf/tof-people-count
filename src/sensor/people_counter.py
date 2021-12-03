@@ -159,26 +159,19 @@ class PeopleCounter ():
             th = threading.Thread(target=cb, args=(countChange, self.directionState))
             th.start()
 
-    def getDirectionTime(self, direction: Directions, time: str) -> datetime:
-        if len(self.directionState[direction]) <= 0:
-            return None
-
-        return self.directionState[direction][-1][time]
-
     def updateState(self, direction: Directions, triggered: bool) -> bool:
-        currentlyTriggered = False
+        previouslyTriggered = False
         if len(self.directionState[direction]) > 0:
-            currentlyTriggered = self.getDirectionTime(
-                direction, END_TIME) is None
+            previouslyTriggered = self.directionState[direction][-1][END_TIME] is None
 
-        if triggered and not currentlyTriggered:
+        if triggered and not previouslyTriggered:
             # Set as new beginning for this direction
             self.directionState[direction].append({
                 START_TIME: datetime.now(),
                 END_TIME: None
             })
             return True
-        elif not triggered and currentlyTriggered:
+        elif not triggered and previouslyTriggered:
             # Set as end for this direction
             self.directionState[direction][-1][END_TIME] = datetime.now()
             return True
