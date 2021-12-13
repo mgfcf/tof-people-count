@@ -7,8 +7,10 @@ import threading
 COUNTING_CB = "counting"
 TRIGGER_CB = "trigger"
 CHANGE_CB = "changes"
-START_TIME = "start"
-END_TIME = "end"
+START_TIME = "start_time"
+END_TIME = "end_time"
+TRIGGER_DISTANCES = "trigger_distances"
+END_DISTANCE = "end_distance"
 
 
 class PeopleCounter ():
@@ -54,8 +56,7 @@ class PeopleCounter ():
             self.sensor.setDirection(direction)
 
             distance: float = self.sensor.getDistance()
-            triggered: bool = self.isTriggerDistance(distance)
-            changed: bool = self.updateState(direction, triggered)
+            changed: bool = self.updateState(direction, distance)
 
             if changed:
                 countChange: int = self.getCountChange(self.directionState)
@@ -160,7 +161,9 @@ class PeopleCounter ():
     def isDirectionTriggered(self, direction: Directions) -> bool:
         return len(self.directionState[direction]) > 0 and self.directionState[direction][-1][END_TIME] is None
 
-    def updateState(self, direction: Directions, triggered: bool) -> bool:
+    def updateState(self, direction: Directions, distance: float) -> bool:
+        triggered: bool = self.isTriggerDistance(distance)
+        
         previouslyTriggered = False
         if len(self.directionState[direction]) > 0:
             previouslyTriggered = self.directionState[direction][-1][END_TIME] is None
@@ -169,12 +172,18 @@ class PeopleCounter ():
             # Set as new beginning for this direction
             self.directionState[direction].append({
                 START_TIME: datetime.now(),
-                END_TIME: None
+                END_TIME: None,
+                TRIGGER_DISTANCES: [distance],
+                END_DISTANCE: None
             })
             return True
         elif not triggered and previouslyTriggered:
             # Set as end for this direction
             self.directionState[direction][-1][END_TIME] = datetime.now()
+            self.directionState[direction][-1][END_DISTANCE] = distance
             return True
+        elif previouslyTriggered:
+            # Add distance at least
+            self.directionState[direction][-1][TRIGGER_DISTANCES].append(distance)
 
         return False
