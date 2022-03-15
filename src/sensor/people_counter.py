@@ -129,7 +129,7 @@ class PeopleCounter ():
             return -1
 
     def isTriggerDistance(self, distance: float) -> bool:
-        #! TODO: Should be based on the distance from the ground, not them the sensor
+        #! TODO: Should be based on the distance from the ground, not from the sensor
         return distance <= self.maxTriggerDistance
     
     def handleCallbacks(self, countChange: int):
