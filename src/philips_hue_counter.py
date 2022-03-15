@@ -64,8 +64,7 @@ def count_change(change: int) -> None:
     global motion_triggered_lights
 
     # Are lights on at the moment?
-    previous_lights_state = hue.get_group(hue_conf['light_group'])[
-        'state']['any_on']
+    previous_lights_state = get_light_state()
 
     # Apply correction
     if peopleCount <= 0 and previous_lights_state and not motion_triggered_lights:
@@ -89,11 +88,10 @@ def count_change(change: int) -> None:
     if previous_lights_state == target_light_state:
         if previous_lights_state:
             # Signaling that the people count is taking control over the light now
-            motion_triggered = False
+            motion_triggered_lights = False
         return
 
-    hue.set_group(hue_conf['light_group'], {'on': target_light_state})
-    logging.debug(f'Light state changed to {target_light_state}')
+    set_light_state(target_light_state)
 
 
 def trigger_change(triggerState: Dict):
@@ -110,7 +108,7 @@ def trigger_change(triggerState: Dict):
     # Is someone walking close to the door?
     motion_detected = triggerState[Directions.INSIDE] or triggerState[Directions.OUTSIDE]
     target_light_state = motion_detected
-    
+
     # Does motion triggered light need to do anything?
     if peopleCount > 0:
         # State is successfully handled by the count
@@ -121,19 +119,40 @@ def trigger_change(triggerState: Dict):
     if target_light_state == motion_triggered_lights:
         return
 
+    set_light_state(target_light_state)
+
+    # Save state
+    motion_triggered_lights = target_light_state
+
+
+def set_light_state(target_light_state: bool) -> bool:
+    """Sets the lights to the given state.
+
+    Args:
+        target_light_state (bool): Should lights on the inside be on or off.
+
+    Returns:
+        bool: Previous light state.
+    """
     # Are lights on at the moment?
-    previous_lights_state = hue.get_group(hue_conf['light_group'])[
-        'state']['any_on']
+    previous_lights_state = get_light_state()
     if target_light_state == previous_lights_state:
-        return
+        return previous_lights_state
 
     # Adjust light as necessary
     hue.set_group(hue_conf['light_group'], {'on': target_light_state})
     logging.debug(
         f'Light state changed to {target_light_state} for early light')
 
-    # Save state
-    motion_triggered_lights = target_light_state
+    return previous_lights_state
+
+
+def get_light_state() -> bool:
+    """
+    Returns:
+        bool: Current light state.
+    """
+    return hue.get_group(hue_conf['light_group'])['state']['any_on']
 
 
 # Represents callback trigger order
