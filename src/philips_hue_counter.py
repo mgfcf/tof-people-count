@@ -39,11 +39,12 @@ def change_cb(countChange: int, directionState: Dict):
         directionState (Dict): Object describing the internal state of the sensor.
     """
     data = {
+        'version': 'v0.0',
         'previousPeopleCount': peopleCount,
         'countChange': countChange,
         'directionState': directionState,
         'dateTime': datetime.now(),
-        'earlyLightState': motion_triggered_lights
+        'motionTriggeredLights': motion_triggered_lights
     }
 
     try:
