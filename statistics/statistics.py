@@ -3,7 +3,6 @@ import json
 from typing import Dict
 
 import matplotlib.pyplot as plt
-from numpy import where
 
 # Config
 FILE_PATH = "log.txt"
