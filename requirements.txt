@@ -7,3 +7,6 @@ homeassistant-mqtt-binding
 
 # For Philips Hue Counter
 phue
+
+# For statistics
+matplotlib
