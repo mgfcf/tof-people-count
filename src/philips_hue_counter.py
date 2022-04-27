@@ -37,6 +37,23 @@ timeloop: Timeloop = Timeloop()  # Used for time triggered schedule
 logging.getLogger().setLevel(logging.INFO)
 
 
+def time_minus_time(time_a: time, time_b: time) -> timedelta:
+    """Implementes a basic timedelta function for time objects.
+
+    Args:
+        time_a (time): Time to subtract from.
+        time_b (time): Time to be subtracted.
+
+    Returns:
+        timedelta: Delta between the two time objects.
+    """
+    today = datetime.today()
+    dt_a = datetime.combine(today, time_a)
+    dt_b = datetime.combine(today, time_b)
+    
+    return dt_a - dt_b
+
+
 def get_scene_for_time(time: time) -> string:
     """Determines the correct scene to activate for a given time.
 
@@ -54,7 +71,7 @@ def get_scene_for_time(time: time) -> string:
     previous_scene = None
     for start_time, scene in SCHEDULE.items():
         # If current time is still after schedule time, just keep going
-        if start_time - time < 0:
+        if time_minus_time(start_time, time) < 0:
             previous_scene = scene
             continue
 
@@ -247,7 +264,7 @@ def register_time_triggers():
         return
 
     for time in SCHEDULE.keys():
-        delta = time - datetime.now().time()
+        delta = time_minus_time(time, datetime.now().time())
         if delta < 0:
             delta += timedelta(1)
         
