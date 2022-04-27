@@ -1,5 +1,5 @@
-from datetime import datetime
-from pathlib import Path
+from datetime import datetime, time
+import string
 from typing import Dict
 from interface.philips_hue import PhilipsHue
 from sensor.people_counter import PeopleCounter
@@ -11,6 +11,10 @@ import json
 
 # Should lights already turn on where there is any kind of motion in the sensor
 ENABLE_MOTION_TRIGGERED_LIGHT = True
+
+# Schedule (Key is time after scene should be used. Value is scene name to be used.)
+# Needs to be sorted chronologically
+SCHEDULE = {}
 
 
 LOG_FILE_PATH = "log.txt"   # Path for logs
@@ -29,6 +33,45 @@ peopleCount: int = 0    # Global count of people on the inside
 motion_triggered_lights = False   # Is light on because of any detected motion
 
 logging.getLogger().setLevel(logging.INFO)
+
+
+def get_scene_for_time(time: time) -> string:
+    """Determines the correct scene to activate for a given time.
+
+    Args:
+        time (time): Time to find scene for.
+
+    Returns:
+        string: Scene name that should be active. None, if schedule is empty.
+    """
+    global SCHEDULE
+
+    if SCHEDULE is None or len(SCHEDULE) <= 0:
+        return None
+
+    previous_scene = None
+    for start_time, scene in SCHEDULE.items():
+        # If current time is still after schedule time, just keep going
+        if start_time - time < 0:
+            previous_scene = scene
+            continue
+
+        # Schedule timef is now after current time, which is too late
+        # So if exists, take previous scene, since it was the last before the current time
+        if previous_scene:
+            return previous_scene
+        else:
+            break
+
+    # Only breaks if it could not find a valid scene, so use lates scene as fallback
+    return SCHEDULE.values()[-1]
+
+
+def register_time_triggers():
+    """Registeres time triggered callbacks based on the schedule, to adjust the current scene, if lights are on.
+    """
+    #! TODO
+    logging.info("Registered time triggers.")
 
 
 def change_cb(countChange: int, directionState: Dict):
@@ -126,6 +169,34 @@ def trigger_change(triggerState: Dict):
     motion_triggered_lights = target_light_state
 
 
+def set_light_scene(target_scene: string) -> bool:
+    """Sets the lights to the given scene, but only, if lights are already on. Does not correct count if lights are in an unexpected state.
+
+    Args:
+        target_scene (string): Name of the scene to activate.
+
+    Returns:
+        bool: True, if lights are on after calling this function.
+    """
+    # Are lights on at the moment?
+    light_state = get_light_state()
+    if not light_state:
+        # Lights are off, not doing anything
+        return False
+
+    # Is valid scene?
+    if target_scene is None:
+        return True  # Light still on
+
+    # Set lights to scene
+    hue.set_group_scene(hue_conf['light_group'], target_scene)
+    logging.debug(
+        f'Light scene set to {target_scene}')
+
+    # Lights should be on now
+    return True
+
+
 def set_light_state(target_light_state: bool) -> bool:
     """Sets the lights to the given state.
 
@@ -141,9 +212,15 @@ def set_light_state(target_light_state: bool) -> bool:
         return previous_lights_state
 
     # Adjust light as necessary
-    hue.set_group(hue_conf['light_group'], {'on': target_light_state})
-    logging.debug(
-        f'Light state changed to {target_light_state} for early light')
+    target_scene = get_scene_for_time(datetime.now())
+    # Set to specific scene if exists
+    if target_scene:
+        hue.set_group_scene(hue_conf['light_group'], target_scene)
+        logging.debug(
+            f'Light state changed to {target_light_state} with scene {target_scene}')
+    else:
+        hue.set_group(hue_conf['light_group'], {'on': target_light_state})
+        logging.debug(f'Light state changed to {target_light_state}')
 
     return previous_lights_state
 
@@ -155,6 +232,8 @@ def get_light_state() -> bool:
     """
     return hue.get_group(hue_conf['light_group'])['state']['any_on']
 
+
+register_time_triggers()
 
 # Represents callback trigger order
 counter.hookChange(change_cb)
