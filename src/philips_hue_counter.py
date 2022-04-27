@@ -1,4 +1,4 @@
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 import string
 from typing import Dict
 from interface.philips_hue import PhilipsHue
@@ -7,6 +7,7 @@ from sensor.tof_sensor import Directions
 from sensor.vl53l1x_sensor import VL53L1XSensor
 import logging
 import json
+from timeloop import Timeloop
 
 
 # Should lights already turn on where there is any kind of motion in the sensor
@@ -31,6 +32,7 @@ hue: PhilipsHue = PhilipsHue(hue_conf)  # Light interface
 counter: PeopleCounter = PeopleCounter(VL53L1XSensor())  # Sensor object
 peopleCount: int = 0    # Global count of people on the inside
 motion_triggered_lights = False   # Is light on because of any detected motion
+timeloop: Timeloop = Timeloop()  # Used for time triggered schedule
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -65,13 +67,6 @@ def get_scene_for_time(time: time) -> string:
 
     # Only breaks if it could not find a valid scene, so use lates scene as fallback
     return SCHEDULE.values()[-1]
-
-
-def register_time_triggers():
-    """Registeres time triggered callbacks based on the schedule, to adjust the current scene, if lights are on.
-    """
-    #! TODO
-    logging.info("Registered time triggers.")
 
 
 def change_cb(countChange: int, directionState: Dict):
@@ -212,7 +207,7 @@ def set_light_state(target_light_state: bool) -> bool:
         return previous_lights_state
 
     # Adjust light as necessary
-    target_scene = get_scene_for_time(datetime.now())
+    target_scene = get_scene_for_time(datetime.now().time())
     # Set to specific scene if exists
     if target_scene:
         hue.set_group_scene(hue_conf['light_group'], target_scene)
@@ -231,6 +226,36 @@ def get_light_state() -> bool:
         bool: Current light state.
     """
     return hue.get_group(hue_conf['light_group'])['state']['any_on']
+
+
+def update_scene():
+    """Called by time trigger to update light scene if lights are on.
+    """
+    scene = get_scene_for_time(datetime.now().time())
+    
+    if scene is None:
+        return
+    
+    set_light_scene(scene)
+    logging.debug(f'Updated scene at {datetime.now().time()} to {scene}.')
+
+def register_time_triggers():
+    """Registeres time triggered callbacks based on the schedule, to adjust the current scene, if lights are on.
+    """
+    global SCHEDULE
+    if SCHEDULE is None or len(SCHEDULE) <= 0:
+        return
+
+    for time in SCHEDULE.keys():
+        delta = time - datetime.now().time()
+        if delta < 0:
+            delta += timedelta(1)
+        
+        timeloop._add_job(update_scene, interval=timedelta(1), offset=delta)
+    
+    timeloop.start(block=False)
+
+    logging.info("Registered time triggers.")
 
 
 register_time_triggers()
