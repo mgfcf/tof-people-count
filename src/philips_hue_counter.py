@@ -71,7 +71,7 @@ def get_scene_for_time(time: time) -> string:
     previous_scene = None
     for start_time, scene in SCHEDULE.items():
         # If current time is still after schedule time, just keep going
-        if time_minus_time(start_time, time) < 0:
+        if time_minus_time(start_time, time) < timedelta(0):
             previous_scene = scene
             continue
 
@@ -265,7 +265,7 @@ def register_time_triggers():
 
     for time in SCHEDULE.keys():
         delta = time_minus_time(time, datetime.now().time())
-        if delta < 0:
+        if delta < timedelta(0):
             delta += timedelta(1)
         
         timeloop._add_job(update_scene, interval=timedelta(1), offset=delta)
