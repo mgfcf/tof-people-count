@@ -83,7 +83,7 @@ def get_scene_for_time(time: time) -> string:
             break
 
     # Only breaks if it could not find a valid scene, so use lates scene as fallback
-    return SCHEDULE.values()[-1]
+    return list(SCHEDULE.values())[-1]
 
 
 def change_cb(countChange: int, directionState: Dict):
