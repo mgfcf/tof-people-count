@@ -225,8 +225,8 @@ def set_light_state(target_light_state: bool) -> bool:
 
     # Adjust light as necessary
     target_scene = get_scene_for_time(datetime.now().time())
-    # Set to specific scene if exists
-    if target_scene:
+    if target_light_state and target_scene:
+        # Set to specific scene if exists
         hue.set_group_scene(hue_conf['light_group'], target_scene)
         logging.debug(
             f'Light state changed to {target_light_state} with scene {target_scene}')
