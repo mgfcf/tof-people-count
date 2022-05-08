@@ -1,5 +1,4 @@
 from datetime import datetime, time, timedelta
-import string
 from typing import Dict
 from interface.philips_hue import PhilipsHue
 from sensor.people_counter import PeopleCounter
@@ -50,11 +49,11 @@ def time_minus_time(time_a: time, time_b: time) -> timedelta:
     today = datetime.today()
     dt_a = datetime.combine(today, time_a)
     dt_b = datetime.combine(today, time_b)
-    
+
     return dt_a - dt_b
 
 
-def get_scene_for_time(time: time) -> string:
+def get_scene_for_time(time: time) -> str:
     """Determines the correct scene to activate for a given time.
 
     Args:
@@ -71,7 +70,7 @@ def get_scene_for_time(time: time) -> string:
     previous_scene = None
     for start_time, scene in SCHEDULE.items():
         # If current time is still after schedule time, just keep going
-        if time_minus_time(start_time, time) < timedelta(0):
+        if start_time <= time:
             previous_scene = scene
             continue
 
@@ -181,7 +180,7 @@ def trigger_change(triggerState: Dict):
     motion_triggered_lights = target_light_state
 
 
-def set_light_scene(target_scene: string) -> bool:
+def set_light_scene(target_scene: str) -> bool:
     """Sets the lights to the given scene, but only, if lights are already on. Does not correct count if lights are in an unexpected state.
 
     Args:
@@ -249,12 +248,13 @@ def update_scene():
     """Called by time trigger to update light scene if lights are on.
     """
     scene = get_scene_for_time(datetime.now().time())
-    
+
     if scene is None:
         return
-    
+
     set_light_scene(scene)
     logging.debug(f'Updated scene at {datetime.now().time()} to {scene}.')
+
 
 def register_time_triggers():
     """Registeres time triggered callbacks based on the schedule, to adjust the current scene, if lights are on.
@@ -267,19 +267,20 @@ def register_time_triggers():
         delta = time_minus_time(time, datetime.now().time())
         if delta < timedelta(0):
             delta += timedelta(1)
-        
+
         timeloop._add_job(update_scene, interval=timedelta(1), offset=delta)
-    
+
     timeloop.start(block=False)
 
     logging.info("Registered time triggers.")
 
 
-register_time_triggers()
+if __name__ == "__main__":
+    register_time_triggers()
 
-# Represents callback trigger order
-counter.hookChange(change_cb)
-counter.hookCounting(count_change)
-counter.hookTrigger(trigger_change)
+    # Represents callback trigger order
+    counter.hookChange(change_cb)
+    counter.hookCounting(count_change)
+    counter.hookTrigger(trigger_change)
 
-counter.run()
+    counter.run()
