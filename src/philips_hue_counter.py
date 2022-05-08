@@ -185,27 +185,20 @@ def set_light_scene(target_scene: str) -> bool:
 
     Args:
         target_scene (string): Name of the scene to activate.
-
-    Returns:
-        bool: True, if lights are on after calling this function.
     """
-    # Are lights on at the moment?
-    light_state = get_light_state()
-    if not light_state:
-        # Lights are off, not doing anything
-        return False
-
     # Is valid scene?
     if target_scene is None:
-        return True  # Light still on
+        return
+
+    # Are lights on at the moment? Only based on people count for simplicity
+    if peopleCount <= 0:
+        # Lights are probably off, not doing anything
+        return
 
     # Set lights to scene
     hue.set_group_scene(hue_conf['light_group'], target_scene)
     logging.debug(
         f'Light scene set to {target_scene}')
-
-    # Lights should be on now
-    return True
 
 
 def set_light_state(target_light_state: bool) -> bool:
