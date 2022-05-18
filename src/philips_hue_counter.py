@@ -12,6 +12,9 @@ from timeloop import Timeloop
 # Should lights already turn on where there is any kind of motion in the sensor
 ENABLE_MOTION_TRIGGERED_LIGHT = True
 
+# Should lights change when a certain time in the schedule is reached
+ENABLE_SCHEDULE_TRIGGERS = False    # Not working correctly at the moment, so turned off by default
+
 # Schedule (Key is time after scene should be used. Value is scene name to be used.)
 # Needs to be sorted chronologically
 SCHEDULE = {}
@@ -269,7 +272,8 @@ def register_time_triggers():
 
 
 if __name__ == "__main__":
-    register_time_triggers()
+    if ENABLE_SCHEDULE_TRIGGERS:
+        register_time_triggers()
 
     # Represents callback trigger order
     counter.hookChange(change_cb)
